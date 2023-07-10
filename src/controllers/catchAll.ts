@@ -16,10 +16,12 @@ export class CatchAllController {
     }
 
     public handleRequest(message: {}) {
+        console.log('received handleRequest: %s', message);
         const responseData = {
             name: 'Vlad',
             index: 1,
             error: false,
+            test: false,
             errorText: '',
         };
 

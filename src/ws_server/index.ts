@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { WebSocketServer } from 'ws';
-import { CallbackI } from '../models/interfaces';
+import { CallbackI } from '../models/interfaces.js';
 import { CatchAllController } from '../controllers/catchAll.js';
 
 export const startWSServer = (port: number, cb: CallbackI) => {
@@ -11,7 +11,6 @@ export const startWSServer = (port: number, cb: CallbackI) => {
         ws.on('error', console.error);
 
         ws.on('message', function message(data) {
-            console.log('received: %s', data);
             const response = controller.handleRequest(data);
 
             ws.send(JSON.stringify(response));

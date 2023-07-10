@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as http from 'http';
-import { CallbackI } from '../models/interfaces';
+import { CallbackI } from '../models/interfaces.js';
 
 
 export const startHttpServer = (port: number, cb: CallbackI) => {
