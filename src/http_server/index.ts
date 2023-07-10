@@ -3,8 +3,10 @@ import * as path from 'path';
 import * as http from 'http';
 import { CallbackI } from '../models/interfaces';
 
+
 export const startHttpServer = (port: number, cb: CallbackI) => {
     const httpServer = http.createServer(function (req: http.IncomingMessage, res: http.ServerResponse) {
+
         const __dirname = path.resolve(path.dirname(''));
         const file_path = __dirname + (req.url === '/' ? '/front/index.html' : '/front' + req.url);
         fs.readFile(file_path, function (err, data) {
@@ -20,5 +22,6 @@ export const startHttpServer = (port: number, cb: CallbackI) => {
 
     cb();
 
+    console.log(path.resolve('', 'front', 'index.html'));
     httpServer.listen(port);
 };

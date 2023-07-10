@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { WebSocketServer } from 'ws';
 import { CallbackI } from '../models/interfaces';
-import { CatchAllController } from '../controllers/catchAll';
+import { CatchAllController } from '../controllers/catchAll.js';
 
 export const startWSServer = (port: number, cb: CallbackI) => {
     const wsServer = new WebSocketServer({ port });
