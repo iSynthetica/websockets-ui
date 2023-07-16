@@ -1,5 +1,3 @@
-import { type } from "os";
-
 export interface CallbackI {
     (): void;
 }
@@ -17,7 +15,7 @@ export interface CommandsI {
     randomAttack?: string;
 }
 
-export type WSRequestTypes =
+export type WSMessageTypes =
     | 'reg'
     | 'update_winners'
     | 'create_room'
@@ -28,9 +26,10 @@ export type WSRequestTypes =
     | 'start_game'
     | 'turn'
     | 'finish'
-    | 'attack';
+    | 'attack'
+    | 'add_user_to_room';
 export interface WSRequestI {
-    type?: WSRequestTypes;
+    type?: WSMessageTypes;
     data?: string;
-    id?: number
+    id?: number;
 }

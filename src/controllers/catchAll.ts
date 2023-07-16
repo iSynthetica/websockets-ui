@@ -1,5 +1,5 @@
 import { WebSocket } from 'ws';
-import { PlayersStorage, PlayerI } from '../models/PlayersStorage.js';
+import PlayersStorage from '../models/PlayersStorage.js';
 import { WSRequestI, CommandsI } from '../models/interfaces.js';
 
 export class CatchAllController {
@@ -64,7 +64,7 @@ export class CatchAllController {
                         roomUsers: [
                             {
                                 name: member.name,
-                                index: 0,
+                                index: 2,
                             },
                         ],
                     },
