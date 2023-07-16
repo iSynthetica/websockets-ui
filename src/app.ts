@@ -43,6 +43,10 @@ class App {
         this.eventsController.on('add_user_to_room', (room: RoomModel) => {
             this._createGame(room);
         });
+
+        this.eventsController.on('ships_added', (game: GameModel) => {
+            this._startGame(game);
+        });
     }
 
     private _updateRooms() {
@@ -70,6 +74,20 @@ class App {
         }
     }
 
+    private _startGame(game: GameModel): void {
+        const [p1, p2] = game.players;
+
+        if (p1.ships.length && p2.ships.length) {
+            for (const player of game.players) {
+                const currentPlayerIndex = player.id;
+                const ships = player.ships;
+                const connection = this.webSocketsStorage.getByPlayer(currentPlayerIndex);
+                connection?.send('start_game', JSON.stringify({ ships, currentPlayerIndex }));
+                connection?.send('turn', JSON.stringify({ currentPlayer: p1.id }));
+            }
+        }
+    }
+
     private _createGame(room: RoomModel): void {
         const players = room.players;
 
@@ -82,10 +100,7 @@ class App {
             for (const player of players) {
                 const idPlayer = player.id;
                 const connection = this.webSocketsStorage.getByPlayer(idPlayer);
-                connection?.send(
-                    'create_game',
-                    JSON.stringify({ idGame, idPlayer })
-                );
+                connection?.send('create_game', JSON.stringify({ idGame, idPlayer }));
             }
 
             this._updateRooms();

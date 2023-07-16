@@ -1,13 +1,13 @@
-import BaseModel from "./baseModel.js";
-import PlayersStorage from "./PlayersStorage.js";
+import BaseModel from './baseModel.js';
+import PlayersStorage from './PlayersStorage.js';
 import PlayerModel from './PlayerModel.js';
-import RoomsStorage from "./RoomsStorage.js";
-import RoomModel from "./RoomModel.js";
+import RoomsStorage from './RoomsStorage.js';
+import RoomModel from './RoomModel.js';
 
 interface Ship {
     position: {
-        x: number,
-        y: number
+        x: number;
+        y: number;
     };
     direction: boolean;
     type: string;
@@ -17,6 +17,7 @@ interface Ship {
 interface RoomPlayer {
     id: number;
     ships: Ship[];
+    field: string | number[][];
 }
 
 class GameModel extends BaseModel {
@@ -28,23 +29,61 @@ class GameModel extends BaseModel {
         super();
         this._player1 = {
             id: id1,
-            ships: []
+            ships: [],
+            field: this._generateField([]),
         };
         this._player2 = {
             id: id2,
             ships: [],
+            field: this._generateField([]),
         };
         this._room = roomId;
     }
 
-    get players(): PlayerModel[] {
-        const players = PlayersStorage.getInstance();
-        return [players.get(this._player1.id) as PlayerModel, players.get(this._player2.id) as PlayerModel];
+    get players(): RoomPlayer[] {
+        return [this._player1, this._player2];
     }
 
     get room(): RoomModel {
         const rooms = RoomsStorage.getInstance();
         return rooms.get(this._room) as RoomModel;
+    }
+
+    addShips(id: number, ships: Ship[]): void {
+        if (this._player1.id === id) {
+            this._player1.ships = ships;
+            this._player1.field = this._generateField(ships);
+        } else if (this._player2.id === id) {
+            this._player2.ships = ships;
+            this._player2.field = this._generateField(ships);
+        }
+    }
+
+    private _generateField(ships: Ship[]): string | number [][] {
+        const field = [];
+
+        for (let i = 0; i < 10; i++) {
+            field.push(Array.from({ length: 10 }, (v, i) => 0));
+        }
+
+        for (let ship of ships) {
+            let length = ship.length;
+            let row = ship.position.y;
+            let col = ship.position.x;
+
+            while (length > 0) {
+                console.log(ship.length, row, col);
+                field[row][col] = ship.length;
+                if (ship.direction) {
+                    row++;
+                } else {
+                    col++;
+                }
+                length--;
+            }
+        }
+
+        return field;
     }
 }
 

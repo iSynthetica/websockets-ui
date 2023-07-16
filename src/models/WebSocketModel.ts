@@ -5,6 +5,7 @@ import PlayersStorage from './PlayersStorage.js';
 import PlayerModel from './PlayerModel.js';
 import RoomsStorage from './RoomsStorage.js';
 import EventsController from '../controllers/eventsController.js';
+import GameStorage from './GameStorage.js';
 
 class WebSocketModel extends BaseModel {
     public player: PlayerModel | null;
@@ -52,6 +53,9 @@ class WebSocketModel extends BaseModel {
                 break;
             case 'add_ships':
                 this.addShips(data);
+                break;
+            case 'attack':
+                this.attack(data);
                 break;
             default:
                 console.log('type:', type);
@@ -106,6 +110,15 @@ class WebSocketModel extends BaseModel {
         console.log('player:', this.player);
 
         const { gameId, ships, indexPlayer } = data;
+
+        const game = GameStorage.getInstance().get(gameId);
+        game?.addShips(indexPlayer, ships);
+        this.eventsController.emit(`ships_added`, game);
+    }
+
+    attack(data: { gameId: number; indexPlayer: number; x: number; y: number }): void {
+        console.log('type:', 'attack');
+        console.log('data:', JSON.stringify(data, null, 2));
     }
 
     addUserToRoom(data: { indexRoom: number }) {
@@ -128,7 +141,7 @@ class WebSocketModel extends BaseModel {
             data,
             id: this.id,
         };
-        console.log(response);
+        // console.log(response);
 
         this.ws.send(JSON.stringify(response));
     }
