@@ -1,12 +1,14 @@
-import { WebSocket } from "ws";
-import WebSocketModel from "./models/WebSocketModel.js";
-import PlayersStorage from "./models/PlayersStorage.js";
-import WebSocketsStorage from "./models/WebSocketsStorage.js";
-import RoomsStorage from "./models/RoomsStorage.js";
-import EventsController from "./controllers/eventsController.js";
-import GameStorage from "./models/GameStorage.js";
-import RoomModel from "./models/RoomModel.js";
-import GameModel from "./models/GameModel.js";
+import { WebSocket } from 'ws';
+import WebSocketModel from './models/WebSocketModel.js';
+import PlayersStorage from './models/PlayersStorage.js';
+import WebSocketsStorage from './models/WebSocketsStorage.js';
+import RoomsStorage from './models/RoomsStorage.js';
+import EventsController from './controllers/eventsController.js';
+import GameStorage from './models/GameStorage.js';
+import RoomModel from './models/RoomModel.js';
+import GameModel from './models/GameModel.js';
+import { AttackStatusI } from './models/GameModel.js';
+import PlayerModel from './models/PlayerModel.js';
 
 class App {
     private webSocketsStorage: WebSocketsStorage;
@@ -35,23 +37,32 @@ class App {
             console.log(`Player ${name} signed in!`);
         });
 
-        this.eventsController.on('create_room', () => {
-            console.log('Room created!');
-            this._updateRooms();
-        });
+        this.eventsController.on('create_room', this._updateRooms.bind(this));
+        this.eventsController.on('add_user_to_room', this._createGame.bind(this));
+        this.eventsController.on('ships_added', this._startGame.bind(this));
+        this.eventsController.on('attack', this._attack.bind(this));
+    }
 
-        this.eventsController.on('add_user_to_room', (room: RoomModel) => {
-            this._createGame(room);
-        });
+    private _attack(id: number, game: GameModel, attackStatuses: AttackStatusI[]) {
+        const players = game.players;
 
-        this.eventsController.on('ships_added', (game: GameModel) => {
-            this._startGame(game);
-        });
+        for (const player of players) {
+            const connection = this.webSocketsStorage.getByPlayer(player.id);
+            for (const attackStatuse of attackStatuses) {
+                connection?.send('attack', JSON.stringify(attackStatuse));
+            }
+        }
+
+        const currentPlayer = players.find(p => p.id !== id);
+
+        for (const player of players) {
+            const connection = this.webSocketsStorage.getByPlayer(player.id);
+            connection?.send('turn', JSON.stringify({ currentPlayer: currentPlayer!.id }));
+        }
     }
 
     private _updateRooms() {
         const availableRooms = this.roomStorage.getAvailableRooms();
-        console.log('availableRooms', availableRooms);
 
         if (availableRooms && availableRooms.length) {
             let roomsData = [];

@@ -4,11 +4,24 @@ import PlayerModel from './PlayerModel.js';
 import RoomsStorage from './RoomsStorage.js';
 import RoomModel from './RoomModel.js';
 
+export interface AttackStatusI {
+    position: {
+        x: number;
+        y: number;
+    };
+    currentPlayer: number;
+    status: 'miss' | 'shot' | 'kill';
+}
+
 interface Ship {
     position: {
         x: number;
         y: number;
     };
+    coordinates?: {
+        x: number,
+        y: number
+    }[];
     direction: boolean;
     type: string;
     length: number;
@@ -59,7 +72,43 @@ class GameModel extends BaseModel {
         }
     }
 
-    private _generateField(ships: Ship[]): string | number [][] {
+    attack(id: number, col: number, row: number): AttackStatusI[] {
+        let field = this._generateField([]);
+
+        if (this._player1.id === id) {
+            field = this._player1.field;
+        } else if (this._player2.id === id) {
+            field = this._player1.field;
+        }
+
+        let returnStatuses: AttackStatusI[] = [];
+
+        let cell = field[row][col];
+
+        if (cell === 0 || cell === 'm' || cell === 'x') {
+            returnStatuses.push({
+                position: {
+                    x: col,
+                    y: row,
+                },
+                currentPlayer: id,
+                status: 'miss',
+            });
+        } else {
+            returnStatuses.push({
+                position: {
+                    x: col,
+                    y: row,
+                },
+                currentPlayer: id,
+                status: 'shot',
+            });
+        }
+
+        return returnStatuses;
+    }
+
+    private _generateField(ships: Ship[]): string | number[][] {
         const field = [];
 
         for (let i = 0; i < 10; i++) {
@@ -72,8 +121,8 @@ class GameModel extends BaseModel {
             let col = ship.position.x;
 
             while (length > 0) {
-                console.log(ship.length, row, col);
                 field[row][col] = ship.length;
+                ship.coordinates?.push({x: row, y: col})
                 if (ship.direction) {
                     row++;
                 } else {
@@ -81,6 +130,9 @@ class GameModel extends BaseModel {
                 }
                 length--;
             }
+
+            console.log(JSON.stringify(ship, null, 2));
+            
         }
 
         return field;

@@ -57,6 +57,9 @@ class WebSocketModel extends BaseModel {
             case 'attack':
                 this.attack(data);
                 break;
+            case 'randomAttack':
+                this.randomAttack(data);
+                break;
             default:
                 console.log('type:', type);
                 console.log('data:', data);
@@ -105,12 +108,7 @@ class WebSocketModel extends BaseModel {
     }
 
     addShips(data: { gameId: number; ships: []; indexPlayer: number }) {
-        console.log('type:', 'add_ships');
-        console.log('data:', JSON.stringify(data, null, 2));
-        console.log('player:', this.player);
-
         const { gameId, ships, indexPlayer } = data;
-
         const game = GameStorage.getInstance().get(gameId);
         game?.addShips(indexPlayer, ships);
         this.eventsController.emit(`ships_added`, game);
@@ -119,6 +117,19 @@ class WebSocketModel extends BaseModel {
     attack(data: { gameId: number; indexPlayer: number; x: number; y: number }): void {
         console.log('type:', 'attack');
         console.log('data:', JSON.stringify(data, null, 2));
+        const { gameId, indexPlayer, x, y } = data;
+        const game = GameStorage.getInstance().get(gameId);
+
+        this.eventsController.emit(`attack`, indexPlayer, game, game?.attack(indexPlayer, x, y));
+    }
+
+    randomAttack(data: { gameId: number; indexPlayer: number }): void {
+        console.log('type:', 'attack');
+        console.log('data:', JSON.stringify(data, null, 2));
+        const { gameId, indexPlayer } = data;
+        const game = GameStorage.getInstance().get(gameId);
+
+        this.eventsController.emit(`attack`, indexPlayer, game, game?.attack(indexPlayer, 5, 6));
     }
 
     addUserToRoom(data: { indexRoom: number }) {
@@ -127,7 +138,7 @@ class WebSocketModel extends BaseModel {
 
         if (room) {
             room.addUser(this.player as PlayerModel);
-            this.eventsController.addUserToRoom(room);
+            this.eventsController.emit(`add_user_to_room`, room);
         }
     }
 
