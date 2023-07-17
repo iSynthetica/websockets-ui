@@ -97,8 +97,11 @@ class WebSocketModel extends BaseModel {
 
     createRoom() {
         const roomStorage = RoomsStorage.getInstance();
-        roomStorage.create(this.player as PlayerModel);
-        this.eventsController.emit(`create_room`);
+        const playerRooms = roomStorage.getByPlayer(this.player!.id);
+        if (!playerRooms || !playerRooms.length) {
+            roomStorage.create(this.player as PlayerModel);
+            this.eventsController.emit(`create_room`);
+        }
     }
 
     addShips(data: { gameId: number; ships: []; indexPlayer: number }) {
@@ -145,10 +148,10 @@ class WebSocketModel extends BaseModel {
 
                 if (playerRooms && playerRooms.length) {
                     for (const room of playerRooms) {
-                        roomStorage.delete(room.id)
+                        roomStorage.delete(room.id);
                     }
                 }
-                
+
                 this.eventsController.emit(`add_user_to_room`, room);
             }
         }
