@@ -18,7 +18,7 @@ class RoomsStorage {
     }
 
     public get(id: number): RoomModel | undefined {
-        return this._rooms.find((room: RoomModel) => room.id === id)
+        return this._rooms.find((room: RoomModel) => room.id === id);
     }
 
     public create(player: PlayerModel): RoomModel {
@@ -28,8 +28,16 @@ class RoomsStorage {
         return room;
     }
 
+    public delete(id: number) {
+        this._rooms = this._rooms.filter(r => r.id !== id);
+    }
+
     public getAvailableRooms(): RoomModel[] {
         return this._rooms.filter(room => room.players.length < 2);
+    }
+
+    public getByPlayer(id: number): RoomModel[] {
+        return this._rooms.filter((r: RoomModel) => r.players.find((p: PlayerModel) => p.id === id));
     }
 }
 

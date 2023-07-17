@@ -44,8 +44,19 @@ class App {
         const connection = this.webSocketsStorage.get(id);
 
         if (connection) {
-            const player = connection.player;
+            // Delete connection from storage
             this.webSocketsStorage.delete(id);
+            const player = connection.player;
+            if (player) {
+                const rooms: RoomModel[] = this.roomStorage.getByPlayer(player.id);
+
+                if (rooms) {
+                    for (const room of rooms) {
+                        this.roomStorage.delete(room.id);
+                    }
+                }
+            }
+            this._updateRooms.call(this);
         }
     }
 
@@ -89,6 +100,7 @@ class App {
             } else {
                 connection!.send('finish', JSON.stringify({ winPlayer: currentPlayer }));
                 this._updateWinners.call(this);
+                this._updateRooms.call(this);
             }
         }
     }
