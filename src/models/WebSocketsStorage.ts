@@ -27,12 +27,20 @@ class WebSocketsStorage {
         return this._connections.find(connection => connection.player?.id === id);
     }
 
+    public get(id: number): WebSocketModel | undefined {
+        return this._connections.find((conn: WebSocketModel) => conn.id === id)
+    }
+
     public create(ws: WebSocket, eventsController: EventsController): WebSocketModel {
         const id = generateIndex();
         const connection: WebSocketModel = new WebSocketModel(ws, eventsController);
         this._connections.push(connection);
 
         return connection;
+    }
+
+    public delete(id: number) {
+        this._connections = this._connections.filter((connection: WebSocketModel) => connection.id !== id);
     }
 }
 

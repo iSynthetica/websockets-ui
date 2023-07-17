@@ -30,7 +30,10 @@ class WebSocketModel extends BaseModel {
         });
 
         instance.ws.on('close', function close() {
-            console.log(`connection id ${instance.id} closed`);
+            console.log('');
+            console.log('\x1b[101m\x1b[1m   ×   \x1b[0m', `Connection with id \x1b[91m${instance.id}\x1b[0m closed`);
+            console.log('');
+            instance.eventsController.emit(`connection_closed`, instance.id);
         });
     }
 
@@ -40,6 +43,12 @@ class WebSocketModel extends BaseModel {
         const decodedMessage = JSON.parse(message.toString());
         const type: WSMessageTypes = decodedMessage.type;
         const data = decodedMessage.data.trim() ? JSON.parse(decodedMessage.data) : '';
+        console.log('\x1b[104m\x1b[1m  <-  \x1b[0m', `\x1b[94m${this.id}\x1b[0m`);
+        console.log('\x1b[94m\x1b[1m type:\x1b[0m', type);
+        if (decodedMessage.data.trim()) {
+            console.log('\x1b[94m\x1b[1m data:\x1b[0m', decodedMessage.data);
+        }
+        console.log('');
 
         switch (type) {
             case 'reg':
@@ -61,8 +70,6 @@ class WebSocketModel extends BaseModel {
                 this.randomAttack(data);
                 break;
             default:
-                console.log('type:', type);
-                console.log('data:', data);
                 this.send('reg', '{"message":"Hello"}');
         }
     }
@@ -76,41 +83,26 @@ class WebSocketModel extends BaseModel {
 
             if (player) {
                 this.player = player;
-                this.eventsController.reg(player.name);
-
-                this.send(
-                    'reg',
-                    JSON.stringify({
-                        name: player.name,
-                        index: player.id,
-                    })
-                );
-
+                this.send('reg', JSON.stringify({ name, index: player.id }));
                 this.createRoom();
             }
         } catch (error: unknown) {
             if (error instanceof Error) {
-                this.send(
-                    'reg',
-                    JSON.stringify({
-                        error: true,
-                        errorText: error.message,
-                    })
-                );
+                this.send('reg', JSON.stringify({ error: true, errorText: error.message }));
             }
         }
     }
 
     createRoom() {
         const roomStorage = RoomsStorage.getInstance();
-        const room = roomStorage.create(this.player as PlayerModel);
-        this.eventsController.createRoom();
+        roomStorage.create(this.player as PlayerModel);
+        this.eventsController.emit(`create_room`);
     }
 
     addShips(data: { gameId: number; ships: []; indexPlayer: number }) {
         const { gameId, ships, indexPlayer } = data;
         const game = GameStorage.getInstance().get(gameId);
-        game?.addShips(indexPlayer, ships);
+        game!.addShips(indexPlayer, ships);
         this.eventsController.emit(`ships_added`, game);
     }
 
@@ -137,8 +129,14 @@ class WebSocketModel extends BaseModel {
         const room = roomStorage.get(data.indexRoom);
 
         if (room) {
-            room.addUser(this.player as PlayerModel);
-            this.eventsController.emit(`add_user_to_room`, room);
+            room.players
+            if (
+                room.players.length < 2
+                && room.players[0].id !== this.player?.id
+            ) {
+                room.addUser(this.player as PlayerModel);
+                this.eventsController.emit(`add_user_to_room`, room);
+            }
         }
     }
 
@@ -147,14 +145,12 @@ class WebSocketModel extends BaseModel {
     }
 
     send(type: WSMessageTypes, data: string): void {
-        const response = {
-            type,
-            data,
-            id: this.id,
-        };
-        // console.log(response);
+        console.log('\x1b[103m\x1b[1m  ->  \x1b[0m', `\x1b[93m${this.id}\x1b[0m`);
+        console.log('\x1b[93m\x1b[1m type:\x1b[0m', type);
+        console.log('\x1b[93m\x1b[1m data:\x1b[0m', data);
+        console.log('');
 
-        this.ws.send(JSON.stringify(response));
+        this.ws.send(JSON.stringify({ type, data, id: this.id }));
     }
 }
 

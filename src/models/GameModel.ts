@@ -138,12 +138,12 @@ class GameModel extends BaseModel {
 
         returnStatuses.unshift(status);
 
-        console.log('Field === ');
-        console.log('', '', 0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-        for (let i in field) {
-            const row = field[i];
-            console.log(+i, '|', ...row, '|');
-        }
+        // console.log('Field === ');
+        // console.log('', '', 0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+        // for (let i in field) {
+        //     const row = field[i];
+        //     console.log(+i, '|', ...row, '|');
+        // }
 
         return returnStatuses;
     }

@@ -33,14 +33,20 @@ class App {
     }
 
     setEventListeners(): void {
-        this.eventsController.on('reg', (name: string) => {
-            console.log(`Player ${name} signed in!`);
-        });
-
         this.eventsController.on('create_room', this._updateRooms.bind(this));
         this.eventsController.on('add_user_to_room', this._createGame.bind(this));
         this.eventsController.on('ships_added', this._startGame.bind(this));
         this.eventsController.on('attack', this._attack.bind(this));
+        this.eventsController.on('connection_closed', this._connectionClosed.bind(this));
+    }
+
+    private _connectionClosed(id: number) {
+        const connection = this.webSocketsStorage.get(id);
+
+        if (connection) {
+            const player = connection.player;
+            this.webSocketsStorage.delete(id);
+        }
     }
 
     private _attack(id: number, game: GameModel, attackStatuses: AttackStatusI[]) {
