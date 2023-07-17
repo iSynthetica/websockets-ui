@@ -101,7 +101,11 @@ class GameModel extends BaseModel {
             status: 'miss',
         };
 
-        if (cell === '-' || cell === 'm' || cell === 'x') {
+        if (cell === 'm' || cell === 'x') {
+            return null;
+        }
+
+        if (cell === '-') {
             if (cell === '-') field[y][x] = 'm';
         } else {
             status.status = 'shot';
@@ -169,7 +173,11 @@ class GameModel extends BaseModel {
             }
         }
 
-        return cells[Math.floor(Math.random() * cells.length)];
+        const randomCell = cells[Math.floor(Math.random() * cells.length)];
+
+        console.log('Random cell', randomCell);
+
+        return randomCell;
     }
 
     isWinner(id: number): boolean {
@@ -178,7 +186,7 @@ class GameModel extends BaseModel {
         for (const row of field) {
             for (const cell of row) {
                 if (typeof cell === 'number') {
-                    return false
+                    return false;
                 }
             }
         }

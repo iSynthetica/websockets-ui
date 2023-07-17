@@ -100,6 +100,12 @@ class App {
                 connection!.send('turn', JSON.stringify({ currentPlayer: currentPlayer }));
             } else {
                 connection!.send('finish', JSON.stringify({ winPlayer: currentPlayer }));
+                const playerRooms = this.roomStorage.getByPlayer(player.id);
+                if (playerRooms) {
+                    for (const playerRoom of playerRooms) {
+                        this.roomStorage.delete(playerRoom.id);
+                    }
+                }
                 this._updateWinners.call(this);
                 this._updateRooms.call(this);
             }
@@ -128,7 +134,7 @@ class App {
                 connection.send('update_room', JSON.stringify(roomsData));
             }
         }
-        
+
         for (const connection of this.webSocketsStorage.connections) {
             connection.send('update_room', JSON.stringify(roomsData));
         }

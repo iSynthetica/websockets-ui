@@ -132,8 +132,7 @@ class WebSocketModel extends BaseModel {
         const { gameId, indexPlayer } = data;
         const game = GameStorage.getInstance().get(gameId);
         const { x, y } = game!.getRandomCell(indexPlayer);
-
-        this.eventsController.emit(`attack`, indexPlayer, game, game?.attack(indexPlayer, x, y));
+        this.attack({gameId, indexPlayer, x, y});
     }
 
     addUserToRoom(data: { indexRoom: number }) {
