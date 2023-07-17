@@ -9,10 +9,6 @@ export const startWSServer = (port: number, cb: CallbackI) => {
 
     wsServer.on('connection', function connection(ws: WebSocket) {
         console.log(`New connection with id ${app.addConnection(ws)} set up`);
-        
-        ws.on('open', function open() {
-            ws.send('Hello!');
-        });
     });
 
     cb();

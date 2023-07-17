@@ -25,7 +25,7 @@ class WebSocketModel extends BaseModel {
         });
 
         instance.ws.on('open', function () {
-            console.log(`Open in WebSocketModel id ${instance.id}`);
+            console.log(`connection id ${instance.id} opened`);
             this.send('Hello!');
         });
 
@@ -115,21 +115,21 @@ class WebSocketModel extends BaseModel {
     }
 
     attack(data: { gameId: number; indexPlayer: number; x: number; y: number }): void {
-        console.log('type:', 'attack');
-        console.log('data:', JSON.stringify(data, null, 2));
         const { gameId, indexPlayer, x, y } = data;
         const game = GameStorage.getInstance().get(gameId);
+        const attackStatuses = game?.attack(indexPlayer, x, y);
 
-        this.eventsController.emit(`attack`, indexPlayer, game, game?.attack(indexPlayer, x, y));
+        if (attackStatuses) {
+            this.eventsController.emit(`attack`, indexPlayer, game, attackStatuses);
+        }
     }
 
     randomAttack(data: { gameId: number; indexPlayer: number }): void {
-        console.log('type:', 'attack');
-        console.log('data:', JSON.stringify(data, null, 2));
         const { gameId, indexPlayer } = data;
         const game = GameStorage.getInstance().get(gameId);
+        const { x, y } = game!.getRandomCell(indexPlayer);
 
-        this.eventsController.emit(`attack`, indexPlayer, game, game?.attack(indexPlayer, 5, 6));
+        this.eventsController.emit(`attack`, indexPlayer, game, game?.attack(indexPlayer, x, y));
     }
 
     addUserToRoom(data: { indexRoom: number }) {

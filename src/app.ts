@@ -53,11 +53,28 @@ class App {
             }
         }
 
-        const currentPlayer = players.find(p => p.id !== id);
+        let currentPlayer = id;
+
+        if (attackStatuses[0].status === 'miss') {
+            currentPlayer = players.find(p => p.id !== id)!.id;
+        }
+
+        game.currentPlayer = currentPlayer;
 
         for (const player of players) {
             const connection = this.webSocketsStorage.getByPlayer(player.id);
-            connection?.send('turn', JSON.stringify({ currentPlayer: currentPlayer!.id }));
+
+            let isFinish = false;
+
+            if (attackStatuses[0].status === 'killed' && game.isWinner(currentPlayer)) {
+                isFinish = true;
+            }
+
+            if (!isFinish) {
+                connection!.send('turn', JSON.stringify({ currentPlayer: currentPlayer }));
+            } else {
+                connection!.send('finish', JSON.stringify({ winPlayer: currentPlayer }));
+            }
         }
     }
 
