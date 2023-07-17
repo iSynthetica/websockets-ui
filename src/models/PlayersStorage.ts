@@ -15,6 +15,10 @@ class PlayersStorage {
         return PlayersStorage._instance;
     }
 
+    get winners(): PlayerModel[] {
+        return this.players.filter((player: PlayerModel) => player.wins).sort((w1, w2) => w2.wins - w1.wins);
+    }
+
     public login(name: string, password: string): PlayerModel {
         const player = this.players.find(player => player.name === name);
 

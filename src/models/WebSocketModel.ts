@@ -6,6 +6,7 @@ import PlayerModel from './PlayerModel.js';
 import RoomsStorage from './RoomsStorage.js';
 import EventsController from '../controllers/eventsController.js';
 import GameStorage from './GameStorage.js';
+import GameModel from './GameModel.js';
 
 class WebSocketModel extends BaseModel {
     public player: PlayerModel | null;
@@ -108,11 +109,19 @@ class WebSocketModel extends BaseModel {
 
     attack(data: { gameId: number; indexPlayer: number; x: number; y: number }): void {
         const { gameId, indexPlayer, x, y } = data;
-        const game = GameStorage.getInstance().get(gameId);
-        const attackStatuses = game?.attack(indexPlayer, x, y);
+        const game = GameStorage.getInstance().get(gameId) as GameModel;
+        const attackStatuses = game.attack(indexPlayer, x, y);
 
         if (attackStatuses) {
-            this.eventsController.emit(`attack`, indexPlayer, game, attackStatuses);
+            let isFinish = false;
+
+            if (attackStatuses[0].status === 'killed' && game.isWinner(indexPlayer)) {
+                isFinish = true;
+                (this.player as PlayerModel).setWin();
+                console.log('wins', this.player!.wins);
+                
+            }
+            this.eventsController.emit(`attack`, indexPlayer, game, isFinish, attackStatuses);
         }
     }
 

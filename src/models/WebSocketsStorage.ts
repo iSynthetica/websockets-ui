@@ -27,6 +27,10 @@ class WebSocketsStorage {
         return this._connections.find(connection => connection.player?.id === id);
     }
 
+    public getAll(): WebSocketModel[] {
+        return this._connections
+    }
+
     public get(id: number): WebSocketModel | undefined {
         return this._connections.find((conn: WebSocketModel) => conn.id === id)
     }

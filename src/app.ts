@@ -49,7 +49,21 @@ class App {
         }
     }
 
-    private _attack(id: number, game: GameModel, attackStatuses: AttackStatusI[]) {
+    private _updateWinners() {
+        const connections = this.webSocketsStorage.getAll();
+
+        if (connections && connections.length) {
+            const winners = this.playersStorage.winners;
+            if (winners && winners.length) {
+                const winnersData = winners.map(winner => ({ name: winner.name, wins: winner.wins }));
+                for (const connection of connections) {
+                    connection.send('update_winners', JSON.stringify(winnersData));
+                }
+            }
+        }
+    }
+
+    private _attack(id: number, game: GameModel, isFinish: boolean, attackStatuses: AttackStatusI[]) {
         const players = game.players;
 
         for (const player of players) {
@@ -70,16 +84,11 @@ class App {
         for (const player of players) {
             const connection = this.webSocketsStorage.getByPlayer(player.id);
 
-            let isFinish = false;
-
-            if (attackStatuses[0].status === 'killed' && game.isWinner(currentPlayer)) {
-                isFinish = true;
-            }
-
             if (!isFinish) {
                 connection!.send('turn', JSON.stringify({ currentPlayer: currentPlayer }));
             } else {
                 connection!.send('finish', JSON.stringify({ winPlayer: currentPlayer }));
+                this._updateWinners.call(this);
             }
         }
     }
@@ -106,6 +115,8 @@ class App {
                 connection.send('update_room', JSON.stringify(roomsData));
             }
         }
+
+        this._updateWinners.call(this);
     }
 
     private _startGame(game: GameModel): void {
