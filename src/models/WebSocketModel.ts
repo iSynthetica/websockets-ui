@@ -85,7 +85,8 @@ class WebSocketModel extends BaseModel {
             if (player) {
                 this.player = player;
                 this.send('reg', JSON.stringify({ name, index: player.id }));
-                this.createRoom();
+                // this.createRoom();
+                this.eventsController.emit(`create_room`);
             }
         } catch (error: unknown) {
             if (error instanceof Error) {
@@ -119,7 +120,6 @@ class WebSocketModel extends BaseModel {
                 isFinish = true;
                 (this.player as PlayerModel).setWin();
                 console.log('wins', this.player!.wins);
-                
             }
             this.eventsController.emit(`attack`, indexPlayer, game, isFinish, attackStatuses);
         }
@@ -138,11 +138,8 @@ class WebSocketModel extends BaseModel {
         const room = roomStorage.get(data.indexRoom);
 
         if (room) {
-            room.players
-            if (
-                room.players.length < 2
-                && room.players[0].id !== this.player?.id
-            ) {
+            room.players;
+            if (room.players.length < 2 && room.players[0].id !== this.player?.id) {
                 room.addUser(this.player as PlayerModel);
                 this.eventsController.emit(`add_user_to_room`, room);
             }

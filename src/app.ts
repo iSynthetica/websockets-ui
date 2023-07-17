@@ -47,6 +47,7 @@ class App {
             // Delete connection from storage
             this.webSocketsStorage.delete(id);
             const player = connection.player;
+
             if (player) {
                 const rooms: RoomModel[] = this.roomStorage.getByPlayer(player.id);
 
