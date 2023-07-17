@@ -141,6 +141,14 @@ class WebSocketModel extends BaseModel {
             room.players;
             if (room.players.length < 2 && room.players[0].id !== this.player?.id) {
                 room.addUser(this.player as PlayerModel);
+                const playerRooms = roomStorage.getByPlayer(this.player!.id);
+
+                if (playerRooms && playerRooms.length) {
+                    for (const room of playerRooms) {
+                        roomStorage.delete(room.id)
+                    }
+                }
+                
                 this.eventsController.emit(`add_user_to_room`, room);
             }
         }

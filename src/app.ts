@@ -108,9 +108,9 @@ class App {
 
     private _updateRooms() {
         const availableRooms = this.roomStorage.getAvailableRooms();
+        let roomsData = [];
 
         if (availableRooms && availableRooms.length) {
-            let roomsData = [];
 
             for (const room of availableRooms) {
                 roomsData.push({
@@ -127,6 +127,10 @@ class App {
             for (const connection of this.webSocketsStorage.connections) {
                 connection.send('update_room', JSON.stringify(roomsData));
             }
+        }
+        
+        for (const connection of this.webSocketsStorage.connections) {
+            connection.send('update_room', JSON.stringify(roomsData));
         }
 
         this._updateWinners.call(this);
